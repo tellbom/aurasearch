@@ -1,0 +1,2 @@
+{"queryId":"q001","query":"示例公司 年度公告","results":[{"engine":"es","rank":1,"newsId":"announcement:1","title":"示例公司年度公告","latencyMs":12.5},{"engine":"vespa-cjk-bm25-all","rank":1,"newsId":"announcement:1","title":"示例公司年度公告","latencyMs":15.2},{"engine":"rrf","rank":1,"newsId":"announcement:1","title":"示例公司年度公告","latencyMs":16.1}]}
+

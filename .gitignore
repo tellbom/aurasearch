@@ -1,0 +1,16 @@
+bin/
+obj/
+.vs/
+.idea/
+TestResults/
+coverage/
+artifacts/
+.nuget/
+data/
+*.db
+*.db-shm
+*.db-wal
+*.user
+*.suo
+*.nupkg
+*.tar

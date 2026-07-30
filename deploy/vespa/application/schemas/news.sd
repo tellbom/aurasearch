@@ -1,0 +1,104 @@
+schema news {
+    document news {
+        field news_id type string {
+            indexing: attribute | summary
+            match: exact
+            rank: filter
+        }
+        field source_id type string {
+            indexing: attribute | summary
+            match: exact
+            rank: filter
+        }
+        field source_type type string {
+            indexing: attribute | summary
+            match: exact
+            rank: filter
+        }
+        field index_version type long {
+            indexing: attribute | summary
+            attribute: fast-search
+            rank: filter
+        }
+        field content_hash type string {
+            indexing: attribute | summary
+            match: exact
+            rank: filter
+        }
+        field title type string {
+            indexing: index | summary
+            index: enable-bm25
+            match {
+                gram
+                gram-size: 2
+            }
+        }
+        field content type string {
+            indexing: index | summary
+            index: enable-bm25
+            match {
+                gram
+                gram-size: 2
+            }
+        }
+        field publisher type string {
+            indexing: attribute | summary
+            match: exact
+            rank: filter
+        }
+        field author type string {
+            indexing: attribute | summary
+            match: exact
+            rank: filter
+        }
+        field publish_time type long {
+            indexing: attribute | summary
+            attribute: fast-search
+            rank: filter
+        }
+        field content_pretokenized type string {
+            indexing: index
+            index: enable-bm25
+        }
+    }
+
+    fieldset default {
+        fields: title, content
+    }
+
+    document-summary short {
+        summary news_id type string { source: news_id }
+        summary title type string { source: title }
+        summary publisher type string { source: publisher }
+        summary author type string { source: author }
+        summary source_type type string { source: source_type }
+        summary publish_time type long { source: publish_time }
+        summary content type string {
+            source: content
+            dynamic
+        }
+    }
+
+    rank-profile cjk_bm25_all {
+        first-phase {
+            expression: 3 * bm25(title) + bm25(content)
+        }
+    }
+
+    rank-profile cjk_bm25_weakand inherits cjk_bm25_all {}
+
+    rank-profile cjk_native_all {
+        first-phase {
+            expression: 3 * nativeRank(title) + nativeRank(content)
+        }
+    }
+
+    rank-profile cjk_native_weakand inherits cjk_native_all {}
+
+    rank-profile pretokenized_bm25 {
+        first-phase {
+            expression: 3 * bm25(title) + bm25(content_pretokenized)
+        }
+    }
+}
+

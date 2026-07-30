@@ -1,0 +1,43 @@
+services:
+  dual-news-search:
+    build:
+      context: ../..
+      dockerfile: deploy/app/Dockerfile
+    image: ${APP_IMAGE:?APP_IMAGE must be set}
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      Elasticsearch__Endpoint: ${ELASTICSEARCH_ENDPOINT:?ELASTICSEARCH_ENDPOINT must be set}
+      Elasticsearch__IndexAlias: ${ELASTICSEARCH_INDEX_ALIAS:?ELASTICSEARCH_INDEX_ALIAS must be set}
+      Vespa__Endpoint: ${VESPA_ENDPOINT:?VESPA_ENDPOINT must be set}
+      Indexing__SqlitePath: /app/data/search.db
+      SearchMode__Default: ${SEARCH_MODE:-EsOnly}
+    volumes:
+      - search-data:/app/data
+    networks:
+      - search-internal
+      - search-upstream
+    ports:
+      - "${APP_BIND_ADDRESS:-127.0.0.1}:${APP_PORT:-8088}:8080"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "bash",
+          "-c",
+          "exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /health/live HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q '200 OK' <&3"
+        ]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+
+volumes:
+  search-data:
+
+networks:
+  search-internal:
+    name: ${SEARCH_NETWORK:-dual-news-search}
+    external: true
+  search-upstream:
+    name: ${SEARCH_UPSTREAM_NETWORK:-dual-news-search-upstream}
+    external: true

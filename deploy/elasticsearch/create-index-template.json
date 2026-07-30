@@ -1,0 +1,47 @@
+{
+  "settings": {
+    "number_of_shards": 1,
+    "analysis": {
+      "analyzer": {
+        "news_ik": {
+          "type": "custom",
+          "tokenizer": "ik_max_word"
+        }
+      }
+    }
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "news_id": { "type": "keyword" },
+      "source_id": { "type": "keyword" },
+      "source_type": { "type": "keyword" },
+      "title": {
+        "type": "text",
+        "analyzer": "news_ik",
+        "search_analyzer": "ik_smart",
+        "fields": {
+          "keyword": { "type": "keyword", "ignore_above": 1000 }
+        }
+      },
+      "content_text": {
+        "type": "text",
+        "analyzer": "news_ik",
+        "search_analyzer": "ik_smart"
+      },
+      "publisher": {
+        "type": "keyword",
+        "fields": { "text": { "type": "text", "analyzer": "news_ik" } }
+      },
+      "author": {
+        "type": "keyword",
+        "fields": { "text": { "type": "text", "analyzer": "news_ik" } }
+      },
+      "publish_time": { "type": "date" },
+      "content_hash": { "type": "keyword" },
+      "index_version": { "type": "long" }
+    }
+  },
+  "aliases": {}
+}
+

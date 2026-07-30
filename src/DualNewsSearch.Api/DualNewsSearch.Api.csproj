@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DualNewsSearch.Application\DualNewsSearch.Application.csproj" />
+    <ProjectReference Include="..\DualNewsSearch.Infrastructure\DualNewsSearch.Infrastructure.csproj" />
+    <ProjectReference Include="..\DualNewsSearch.Worker\DualNewsSearch.Worker.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  </ItemGroup>
+</Project>
+

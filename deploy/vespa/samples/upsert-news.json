@@ -1,0 +1,17 @@
+{
+  "condition": "news.index_version < 1",
+  "create": true,
+  "fields": {
+    "news_id": "news:sample-1",
+    "source_id": "sample-1",
+    "source_type": "news",
+    "index_version": 1,
+    "content_hash": "replace-with-canonical-sha256",
+    "title": "示例新闻标题",
+    "content": "示例新闻正文",
+    "publisher": "示例发布者",
+    "author": "示例作者",
+    "publish_time": 1785379200
+  }
+}
+

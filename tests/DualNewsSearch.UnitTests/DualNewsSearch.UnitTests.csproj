@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DualNewsSearch.Application\DualNewsSearch.Application.csproj" />
+    <ProjectReference Include="..\..\src\DualNewsSearch.Domain\DualNewsSearch.Domain.csproj" />
+    <ProjectReference Include="..\..\src\DualNewsSearch.Infrastructure\DualNewsSearch.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\DualNewsSearch.Worker\DualNewsSearch.Worker.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="6.12.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
+    <PackageReference Include="xunit" Version="2.5.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.3">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+</Project>
+
