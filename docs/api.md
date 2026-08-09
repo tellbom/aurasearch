@@ -26,7 +26,7 @@
 
 ## 运维
 
-- `GET /health/live`、`GET /health/ready`
+- `GET /health/live`：只表示进程存活；`GET /health/ready`：检查当前搜索模式所需引擎连通性，不执行 count/hash 一致性检查。
 - `GET /api/v1/search-health`
 - `POST /api/v1/search-health/mode`：body 必须包含 mode/operator/reason；Rrf/VespaOnly 先过 readiness。
 - `POST /api/v1/operations/retry-dead`

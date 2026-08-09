@@ -1,11 +1,15 @@
 using System.Diagnostics;
 using System.Text.Json.Serialization;
 using DualNewsSearch.Application.Configuration;
+using DualNewsSearch.Application.Contracts;
+using DualNewsSearch.Api.Health;
 using DualNewsSearch.Infrastructure;
 using DualNewsSearch.Infrastructure.Persistence;
 using DualNewsSearch.Worker;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -13,10 +17,13 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()))
+    .AddMvcOptions(options => options.ModelMetadataDetailsProviders.Add(
+        new SuppressChildValidationMetadataProvider(typeof(BatchDocumentRequest))));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddHealthChecks();
+builder.Services.AddHealthChecks()
+    .AddCheck<RuntimeReadinessHealthCheck>("search-runtime-ready", tags: new[] { "ready" });
 
 AddValidatedOptions<ElasticsearchOptions>(builder, ElasticsearchOptions.SectionName);
 AddValidatedOptions<VespaOptions>(builder, VespaOptions.SectionName);
@@ -72,8 +79,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapControllers();
-app.MapHealthChecks("/health/live");
-app.MapHealthChecks("/health/ready");
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = _ => false
+});
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready")
+});
 
 using (IServiceScope scope = app.Services.CreateScope())
 {

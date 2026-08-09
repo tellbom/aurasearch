@@ -70,7 +70,7 @@ public sealed class VespaAdapter :
                 candidates.Add(new SearchCandidate(
                     newsId,
                     JsonSearchParsing.StringProperty(fields, "title") ?? string.Empty,
-                    JsonSearchParsing.StringProperty(fields, "documentid"),
+                    JsonSearchParsing.StringProperty(fields, "content"),
                     JsonSearchParsing.StringProperty(fields, "publisher") ?? string.Empty,
                     JsonSearchParsing.StringProperty(fields, "author") ?? string.Empty,
                     JsonSearchParsing.ParseSourceType(JsonSearchParsing.StringProperty(fields, "source_type")),
@@ -269,7 +269,7 @@ public sealed class VespaAdapter :
                 .ToString(CultureInfo.InvariantCulture);
         }
 
-        values["yql"] = $"select news_id,title,publisher,author,source_type,publish_time " +
+        values["yql"] = $"select news_id,title,content,publisher,author,source_type,publish_time " +
             $"from {_optionsDocument(options)} where {string.Join(" and ", clauses)}";
         return values;
     }

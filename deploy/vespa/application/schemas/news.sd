@@ -34,7 +34,7 @@ schema news {
             }
         }
         field content type string {
-            indexing: index | summary
+            indexing: index
             index: enable-bm25
             match {
                 gram
@@ -101,4 +101,3 @@ schema news {
         }
     }
 }
-

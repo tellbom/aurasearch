@@ -44,9 +44,17 @@ public sealed class IndexController : ControllerBase
 
     [HttpPost("batch")]
     public async Task<IActionResult> Batch(
-        [FromBody] BatchDocumentRequest request,
+        [FromBody] BatchDocumentRequest? request,
         CancellationToken cancellationToken)
     {
+        if (request?.Documents is null || request.Documents.Count == 0)
+        {
+            ModelState.AddModelError(
+                nameof(BatchDocumentRequest.Documents),
+                "At least one document is required.");
+            return ValidationProblem(ModelState);
+        }
+
         if (request.Documents.Count > _options.BatchSizeLimit)
         {
             ModelState.AddModelError(
@@ -56,19 +64,24 @@ public sealed class IndexController : ControllerBase
         }
 
         var responses = new List<BatchIndexItemResponse>(request.Documents.Count);
-        foreach (BatchDocumentItem item in request.Documents)
+        foreach (BatchDocumentItem? item in request.Documents)
         {
             var validationResults = new List<ValidationResult>();
-            bool valid = Validator.TryValidateObject(
+            bool itemValid = item is not null && Validator.TryValidateObject(
+                item,
+                new ValidationContext(item),
+                validationResults,
+                validateAllProperties: true);
+            bool documentValid = item?.Document is not null && Validator.TryValidateObject(
                 item.Document,
                 new ValidationContext(item.Document),
                 validationResults,
                 validateAllProperties: true);
-            if (!valid || string.IsNullOrWhiteSpace(item.NewsId))
+            if (!itemValid || !documentValid || string.IsNullOrWhiteSpace(item?.NewsId))
             {
                 responses.Add(new BatchIndexItemResponse(
-                    item.NewsId,
-                    item.Document.IndexVersion,
+                    item?.NewsId ?? string.Empty,
+                    item?.Document?.IndexVersion,
                     "Invalid",
                     validationResults.Select(x => x.ErrorMessage ?? "Invalid request").ToArray()));
                 continue;
@@ -99,4 +112,3 @@ public sealed class IndexController : ControllerBase
         return Accepted(responses);
     }
 }
-
