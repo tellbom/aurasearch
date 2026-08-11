@@ -1,0 +1,20 @@
+{
+  "name": "aurasearch-web",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.3.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^4.4.0",
+    "typescript": "5.2.2",
+    "vite": "4.4.9",
+    "vue-tsc": "^1.8.11"
+  }
+}

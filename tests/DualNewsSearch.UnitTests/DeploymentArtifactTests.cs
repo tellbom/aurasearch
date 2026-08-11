@@ -35,6 +35,8 @@ public sealed class DeploymentArtifactTests
 
         script.Should().Contain("docker run --detach");
         script.Should().NotContain("docker compose");
+        script.Should().NotContain("docker network");
+        script.Should().NotContain("--network");
         script.Should().Contain("analysis-ik");
         script.Should().NotContain("prepareandactivate");
         script.Should().NotContain("create-index-template.json");

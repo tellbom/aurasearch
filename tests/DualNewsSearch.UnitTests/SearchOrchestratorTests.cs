@@ -86,6 +86,35 @@ public sealed class SearchOrchestratorTests
         third.Response.MaxDepthReached.Should().BeTrue();
     }
 
+    [Fact]
+    public async Task DayGroupingPagesDatesAndKeepsEveryItemInSelectedDay()
+    {
+        DateTimeOffset latest = DateTimeOffset.Parse("2026-08-11T08:00:00Z");
+        SearchCandidate[] hits = Enumerable.Range(1, 7)
+            .Select(x => Candidate(
+                $"id-{x}",
+                x,
+                latest.AddDays(-(x - 1))))
+            .Append(Candidate("same-day", 8, latest.AddHours(2)))
+            .ToArray();
+        var es = new FakeAdapter("elasticsearch", candidates: hits);
+        SearchOrchestrator orchestrator = Create(SearchMode.EsOnly, es);
+
+        DayGroupedSearchExecution first = await orchestrator.SearchByDayAsync(
+            Query(page: 1, pageSize: 5),
+            default);
+        DayGroupedSearchExecution second = await orchestrator.SearchByDayAsync(
+            Query(page: 2, pageSize: 5),
+            default);
+
+        first.Response.PageSize.Should().Be(5);
+        first.Response.TotalDays.Should().Be(7);
+        first.Response.TotalPages.Should().Be(2);
+        first.Response.Days.Should().HaveCount(5);
+        first.Response.Days[0].Items.Should().HaveCount(2);
+        second.Response.Days.Should().HaveCount(2);
+    }
+
     private static SearchOrchestrator Create(
         SearchMode mode,
         params ISearchEngineAdapter[] adapters)
@@ -96,12 +125,15 @@ public sealed class SearchOrchestratorTests
             new SearchModeState(Options.Create(new SearchModeOptions { Default = mode })));
     }
 
-    private static SearchQuery Query(int page = 1)
+    private static SearchQuery Query(int page = 1, int pageSize = 20)
     {
-        return new SearchQuery("测试", Array.Empty<SourceType>(), null, null, null, null, page, 20);
+        return new SearchQuery("测试", Array.Empty<SourceType>(), null, null, null, null, page, pageSize);
     }
 
-    private static SearchCandidate Candidate(string id, int rank)
+    private static SearchCandidate Candidate(
+        string id,
+        int rank,
+        DateTimeOffset? publishTime = null)
     {
         return new SearchCandidate(
             id,
@@ -110,7 +142,7 @@ public sealed class SearchOrchestratorTests
             string.Empty,
             string.Empty,
             SourceType.News,
-            DateTimeOffset.UnixEpoch,
+            publishTime ?? DateTimeOffset.UnixEpoch,
             rank,
             rank);
     }

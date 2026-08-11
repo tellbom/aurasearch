@@ -89,7 +89,7 @@ public sealed class ElasticsearchAdapter :
                 JsonSearchParsing.ParseSourceType(JsonSearchParsing.StringProperty(source, "source_type")),
                 JsonSearchParsing.DateProperty(source, "publish_time"),
                 rank++,
-                hit.TryGetProperty("_score", out JsonElement score) ? score.GetDouble() : 0));
+                JsonSearchParsing.DoubleProperty(hit, "_score")));
         }
 
         return new EngineSearchResult(Name, candidates, watch.ElapsedMilliseconds, false, null, diagnostic);
@@ -295,7 +295,19 @@ public sealed class ElasticsearchAdapter :
         AddTermFilter(filters, "publisher", query.Publisher);
         AddTermFilter(filters, "author", query.Author);
 
-        return new JsonObject
+        JsonObject textQuery = string.IsNullOrWhiteSpace(query.Query)
+            ? new JsonObject { ["match_all"] = new JsonObject() }
+            : new JsonObject
+            {
+                ["multi_match"] = new JsonObject
+                {
+                    ["query"] = query.Query,
+                    ["fields"] = new JsonArray("title^3", "content_text"),
+                    ["type"] = "best_fields"
+                }
+            };
+
+        var body = new JsonObject
         {
             ["size"] = topK,
             ["track_total_hits"] = true,
@@ -305,15 +317,7 @@ public sealed class ElasticsearchAdapter :
             {
                 ["bool"] = new JsonObject
                 {
-                    ["must"] = new JsonArray(new JsonObject
-                    {
-                        ["multi_match"] = new JsonObject
-                        {
-                            ["query"] = query.Query,
-                            ["fields"] = new JsonArray("title^3", "content_text"),
-                            ["type"] = "best_fields"
-                        }
-                    }),
+                    ["must"] = new JsonArray(textQuery),
                     ["filter"] = filters
                 }
             },
@@ -330,6 +334,14 @@ public sealed class ElasticsearchAdapter :
                 }
             }
         };
+        if (string.IsNullOrWhiteSpace(query.Query))
+        {
+            body["sort"] = new JsonArray(new JsonObject
+            {
+                ["publish_time"] = new JsonObject { ["order"] = "desc" }
+            });
+        }
+        return body;
     }
 
     private static void AddTermFilter(JsonArray filters, string field, string? value)

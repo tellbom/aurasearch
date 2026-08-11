@@ -21,5 +21,15 @@ public sealed class FilterContractTests
         requestFields.Should().Equal(domainFields);
         requestFields.Should().NotContain("Extra");
     }
-}
 
+    [Fact]
+    public void DayGroupedSearchDefaultsToFiveDateGroupsPerPage()
+    {
+        var request = new DayGroupedSearchRequest();
+
+        request.Page.Should().Be(1);
+        request.PageSize.Should().Be(5);
+        request.Query.Should().BeEmpty();
+        request.SourceTypes.Should().Equal(SourceType.News, SourceType.Announcement);
+    }
+}

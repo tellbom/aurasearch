@@ -1,0 +1,17 @@
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", system-ui, sans-serif;
+  color: #1d1d1f;
+  background: #f5f5f7;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; }
+button, input { font: inherit; }
+.demo-shell { min-height: 100vh; padding: 32px 16px; }
+
+@media (max-width: 640px) {
+  .demo-shell { padding: 20px 12px; }
+}

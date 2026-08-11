@@ -47,6 +47,32 @@ public sealed class SearchController : ControllerBase
         }
     }
 
+    [HttpPost("search/day-groups")]
+    [ProducesResponseType(typeof(DayGroupedSearchResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
+    public async Task<IActionResult> SearchByDay(
+        [FromBody] DayGroupedSearchRequest request,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            var query = request.ToDomain();
+            DayGroupedSearchExecution execution = await _orchestrator.SearchByDayAsync(
+                query,
+                cancellationToken);
+            _telemetry.TryEnqueue(new SearchTelemetryEnvelope(query, execution.Search));
+            Response.Headers["X-Search-Trace-ID"] = execution.Response.SearchTraceId.ToString();
+            return Ok(execution.Response);
+        }
+        catch (SearchUnavailableException exception)
+        {
+            return Problem(
+                statusCode: StatusCodes.Status503ServiceUnavailable,
+                title: "Search engines unavailable",
+                detail: exception.Message);
+        }
+    }
+
     [HttpGet("suggest")]
     public async Task<IActionResult> Suggest(
         [FromQuery] string q,

@@ -15,7 +15,6 @@ set -eu
 : "${VESPA_CPU_LIMIT:=60}"
 
 project_name=aurasearch-mvp
-network_name="$project_name"
 es_container="$project_name-es"
 vespa_container="$project_name-vespa"
 
@@ -79,8 +78,6 @@ if ! docker image inspect "$VESPA_IMAGE" >/dev/null 2>&1; then
   docker pull "$VESPA_IMAGE"
 fi
 
-docker network inspect "$network_name" >/dev/null 2>&1 ||
-  docker network create "$network_name" >/dev/null
 docker volume inspect "$project_name-es-data" >/dev/null 2>&1 ||
   docker volume create "$project_name-es-data" >/dev/null
 docker volume inspect "$project_name-vespa-var" >/dev/null 2>&1 ||
@@ -94,7 +91,6 @@ remove_owned_container "$vespa_container"
 docker run --detach \
   --name "$es_container" \
   --restart unless-stopped \
-  --network "$network_name" \
   --ulimit nofile=65535:65535 \
   --env discovery.type=single-node \
   --env xpack.security.enabled=false \
@@ -107,7 +103,6 @@ docker run --detach \
   --name "$vespa_container" \
   --hostname vespa \
   --restart unless-stopped \
-  --network "$network_name" \
   --ulimit nofile=262144:262144 \
   --memory "$VESPA_MEMORY_LIMIT" \
   --cpus "$VESPA_CPU_LIMIT" \

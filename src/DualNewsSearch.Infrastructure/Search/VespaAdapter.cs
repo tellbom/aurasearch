@@ -229,16 +229,22 @@ public sealed class VespaAdapter :
         int topK,
         VespaOptions options)
     {
-        var clauses = new List<string> { "userQuery()" };
+        var clauses = new List<string>
+        {
+            string.IsNullOrWhiteSpace(query.Query) ? "true" : "userQuery()"
+        };
         var values = new Dictionary<string, string>(StringComparer.Ordinal)
         {
-            ["query"] = query.Query,
             ["type"] = "all",
-            ["ranking"] = options.RankProfile,
             ["hits"] = topK.ToString(CultureInfo.InvariantCulture),
             ["timeout"] = $"{options.TimeoutMs}ms",
             ["presentation.summary"] = "short"
         };
+        if (!string.IsNullOrWhiteSpace(query.Query))
+        {
+            values["query"] = query.Query;
+            values["ranking"] = options.RankProfile;
+        }
 
         if (query.SourceTypes.Count > 0)
         {
@@ -269,8 +275,11 @@ public sealed class VespaAdapter :
                 .ToString(CultureInfo.InvariantCulture);
         }
 
+        string orderBy = string.IsNullOrWhiteSpace(query.Query)
+            ? " order by publish_time desc"
+            : string.Empty;
         values["yql"] = $"select news_id,title,content,publisher,author,source_type,publish_time " +
-            $"from {_optionsDocument(options)} where {string.Join(" and ", clauses)}";
+            $"from {_optionsDocument(options)} where {string.Join(" and ", clauses)}{orderBy}";
         return values;
     }
 

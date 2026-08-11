@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Nodes;
 using DualNewsSearch.Application.Configuration;
 using DualNewsSearch.Domain;
@@ -46,6 +47,41 @@ public sealed class AdapterRequestConstructionTests
         parameters["yql"].Should().Contain("userQuery()");
         parameters["yql"].Should().Contain("@publisher");
         parameters["yql"].Should().Contain("@author");
+    }
+
+    [Fact]
+    public void EmptyQueryUsesUnscoredMatchAllQueries()
+    {
+        SearchQuery query = FullQuery(string.Empty);
+
+        JsonObject elasticsearch = ElasticsearchAdapter.BuildSearchBody(query, 50);
+        IReadOnlyDictionary<string, string> vespa = VespaAdapter.BuildQueryParameters(
+            query,
+            50,
+            new VespaOptions
+            {
+                Endpoint = "http://vespa:8080",
+                Namespace = "news",
+                DocumentType = "news",
+                RankProfile = "cjk_bm25_all",
+                TimeoutMs = 2000
+            });
+
+        elasticsearch["query"]!["bool"]!["must"]![0]!["match_all"].Should().NotBeNull();
+        elasticsearch["sort"]![0]!["publish_time"]!["order"]!.GetValue<string>()
+            .Should().Be("desc");
+        vespa.Should().NotContainKey("query");
+        vespa.Should().NotContainKey("ranking");
+        vespa["yql"].Should().Contain("where true");
+        vespa["yql"].Should().EndWith("order by publish_time desc");
+    }
+
+    [Fact]
+    public void ElasticsearchNullScoreFromSortedQueryDefaultsToZero()
+    {
+        using JsonDocument json = JsonDocument.Parse("{\"_score\":null}");
+
+        JsonSearchParsing.DoubleProperty(json.RootElement, "_score").Should().Be(0);
     }
 
     private static SearchQuery FullQuery(string text)

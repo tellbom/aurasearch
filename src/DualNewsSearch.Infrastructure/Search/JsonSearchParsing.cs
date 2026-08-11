@@ -26,5 +26,12 @@ internal static class JsonSearchParsing
             ? parsed
             : DateTimeOffset.UnixEpoch;
     }
-}
 
+    public static double DoubleProperty(JsonElement element, string name)
+    {
+        return element.TryGetProperty(name, out JsonElement property)
+            && property.ValueKind == JsonValueKind.Number
+            ? property.GetDouble()
+            : 0;
+    }
+}

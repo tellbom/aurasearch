@@ -14,12 +14,12 @@
 环境变量使用 ASP.NET Core 双下划线映射，例如：
 
 ```text
-Elasticsearch__Endpoint=http://es.internal:9200
+Elasticsearch__Endpoint=http://192.168.124.2:29200
 ConnectionStrings__SearchDatabase=Server=dm.internal;Port=5236;User Id=SYSDBA;Password=***;
 Elasticsearch__IndexName=news-v1
 Elasticsearch__IndexAlias=news-read
-Vespa__Endpoint=http://vespa:8080
-Vespa__ConfigEndpoint=http://vespa:19071
+Vespa__Endpoint=http://192.168.124.2:28080
+Vespa__ConfigEndpoint=http://192.168.124.2:29071
 Fusion__RankConstant=60
 SearchMode__Default=EsOnly
 Readiness__BackfillComplete=false

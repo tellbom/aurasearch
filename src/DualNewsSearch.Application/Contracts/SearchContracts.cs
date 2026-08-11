@@ -71,6 +71,73 @@ public sealed record SearchResponse(
     int PageSize,
     IReadOnlyList<SearchResultItem> Results);
 
+public sealed class DayGroupedSearchRequest : IValidatableObject
+{
+    [StringLength(1_000)]
+    public string Query { get; init; } = string.Empty;
+
+    public IReadOnlyList<SourceType> SourceTypes { get; init; } =
+        new[] { SourceType.News, SourceType.Announcement };
+
+    public DateTimeOffset? PublishTimeFrom { get; init; }
+
+    public DateTimeOffset? PublishTimeTo { get; init; }
+
+    [StringLength(500)]
+    public string? Publisher { get; init; }
+
+    [StringLength(500)]
+    public string? Author { get; init; }
+
+    [Range(1, int.MaxValue)]
+    public int Page { get; init; } = 1;
+
+    [Range(1, 30)]
+    public int PageSize { get; init; } = 5;
+
+    public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+    {
+        if (PublishTimeFrom > PublishTimeTo)
+        {
+            yield return new ValidationResult(
+                "PublishTimeFrom must not be later than PublishTimeTo.",
+                new[] { nameof(PublishTimeFrom), nameof(PublishTimeTo) });
+        }
+    }
+
+    public SearchQuery ToDomain()
+    {
+        return new SearchQuery(
+            Query.Trim(),
+            SourceTypes,
+            PublishTimeFrom?.ToUniversalTime(),
+            PublishTimeTo?.ToUniversalTime(),
+            string.IsNullOrWhiteSpace(Publisher) ? null : Publisher.Trim(),
+            string.IsNullOrWhiteSpace(Author) ? null : Author.Trim(),
+            Page,
+            PageSize);
+    }
+}
+
+public sealed record SearchDayGroup(
+    string Date,
+    IReadOnlyList<SearchResultItem> Items);
+
+public sealed record DayGroupedSearchResponse(
+    Guid SearchTraceId,
+    SearchMode SearchMode,
+    bool Degraded,
+    string? DegradationMode,
+    bool MaxDepthReached,
+    int Page,
+    int PageSize,
+    int TotalDays,
+    int TotalPages,
+    int TotalItems,
+    int NewsItems,
+    int AnnouncementItems,
+    IReadOnlyList<SearchDayGroup> Days);
+
 public interface ISearchEngineAdapter
 {
     string Name { get; }

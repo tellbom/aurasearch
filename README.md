@@ -8,7 +8,7 @@
 - Elasticsearch 与 Vespa 使用 Linux Docker 服务；API 和 MVP 测试工具在开发机运行；持久化状态统一写入远程 DM8。
 - API 直接以 .NET 6 进程运行，不构建或启动任何 API Docker 容器。API 启动时自动、幂等地初始化搜索引擎：
   - Elasticsearch：验证主版本为 7，创建缺失的 `IndexName` 和 `IndexAlias`；已存在且指向正确时跳过。
-  - Vespa：将程序集内嵌的 Application Package 提交到 Config API 执行 `prepareandactivate`。重复部署不会清空已有文档，修改 package 后重启 API 即可生效。
+  - Vespa：将程序集内嵌的 Application Package 提交到映射后的 Config API 执行 `prepareandactivate`。重复部署不会清空已有文档，修改 package 后重启 API 即可生效。
   - DM8：生产内网首次部署前执行 `deploy/dm/dm.sql`；AuraSearch 使用独立的 `aurasearch_*` 表和 migration history 表，不覆盖同一 `SYSDBA` schema 下的其他项目。
 
 ## 启动

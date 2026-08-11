@@ -15,6 +15,10 @@ public sealed record SearchExecution(
     long FusionLatencyMs,
     long TotalLatencyMs);
 
+public sealed record DayGroupedSearchExecution(
+    DayGroupedSearchResponse Response,
+    SearchExecution Search);
+
 public sealed class SearchUnavailableException : Exception
 {
     public SearchUnavailableException(string message)
@@ -151,6 +155,56 @@ public sealed class SearchOrchestrator
             ranked,
             fusionWatch.ElapsedMilliseconds,
             totalWatch.ElapsedMilliseconds);
+    }
+
+    public async Task<DayGroupedSearchExecution> SearchByDayAsync(
+        SearchQuery query,
+        CancellationToken cancellationToken)
+    {
+        SearchExecution search = await SearchAsync(
+            query with { Page = 1, PageSize = _fusion.MaxFusionDepth },
+            cancellationToken);
+
+        SearchDayGroup[] allDays = search.Ranked
+            .GroupBy(x => x.PublishTime.ToOffset(TimeSpan.FromHours(8)).ToString("yyyy-MM-dd"))
+            .OrderByDescending(x => x.Key, StringComparer.Ordinal)
+            .Select(group => new SearchDayGroup(
+                group.Key,
+                group.Select(ToResponseItem).ToArray()))
+            .ToArray();
+        int totalPages = allDays.Length == 0
+            ? 0
+            : (int)Math.Ceiling(allDays.Length / (double)query.PageSize);
+        int skip = checked((query.Page - 1) * query.PageSize);
+        SearchDayGroup[] page = allDays.Skip(skip).Take(query.PageSize).ToArray();
+
+        var response = new DayGroupedSearchResponse(
+            search.Response.SearchTraceId,
+            search.Response.SearchMode,
+            search.Response.Degraded,
+            search.Response.DegradationMode,
+            search.Ranked.Count >= _fusion.MaxFusionDepth,
+            query.Page,
+            query.PageSize,
+            allDays.Length,
+            totalPages,
+            search.Ranked.Count,
+            search.Ranked.Count(x => x.SourceType == SourceType.News),
+            search.Ranked.Count(x => x.SourceType == SourceType.Announcement),
+            page);
+        return new DayGroupedSearchExecution(response, search);
+    }
+
+    private static SearchResultItem ToResponseItem(FusedSearchCandidate candidate)
+    {
+        return new SearchResultItem(
+            candidate.NewsId,
+            candidate.Title,
+            candidate.Highlight,
+            candidate.Publisher,
+            candidate.Author,
+            candidate.SourceType,
+            candidate.PublishTime);
     }
 
     private async Task<EngineSearchResult> ExecuteAsync(
