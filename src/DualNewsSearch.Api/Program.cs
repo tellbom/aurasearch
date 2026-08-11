@@ -5,6 +5,7 @@ using DualNewsSearch.Application.Contracts;
 using DualNewsSearch.Api.Health;
 using DualNewsSearch.Infrastructure;
 using DualNewsSearch.Infrastructure.Persistence;
+using DualNewsSearch.Infrastructure.Provisioning;
 using DualNewsSearch.Worker;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -97,6 +98,10 @@ using (IServiceScope scope = app.Services.CreateScope())
     _ = scope.ServiceProvider.GetRequiredService<IOptions<TelemetryOptions>>().Value;
     _ = scope.ServiceProvider.GetRequiredService<IOptions<SearchModeOptions>>().Value;
     _ = scope.ServiceProvider.GetRequiredService<IOptions<ReadinessOptions>>().Value;
+
+    SearchEngineProvisioner provisioner =
+        scope.ServiceProvider.GetRequiredService<SearchEngineProvisioner>();
+    await provisioner.ProvisionAsync(CancellationToken.None);
 
     IDbContextFactory<SearchDbContext> factory =
         scope.ServiceProvider.GetRequiredService<IDbContextFactory<SearchDbContext>>();

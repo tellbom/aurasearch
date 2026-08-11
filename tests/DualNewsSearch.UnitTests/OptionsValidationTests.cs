@@ -13,7 +13,16 @@ public sealed class OptionsValidationTests
         {
             Endpoint = string.Empty,
             IndexAlias = string.Empty,
+            IndexName = string.Empty,
             TimeoutMs = 0
+        };
+        var vespa = new VespaOptions
+        {
+            Endpoint = "http://vespa/",
+            ConfigEndpoint = string.Empty,
+            Namespace = "news",
+            DocumentType = "news",
+            RankProfile = "cjk_bm25_all"
         };
         var fusion = new FusionOptions
         {
@@ -25,6 +34,7 @@ public sealed class OptionsValidationTests
         };
 
         Validate(elasticsearch).Should().NotBeEmpty();
+        Validate(vespa).Should().NotBeEmpty();
         Validate(fusion).Select(x => x.ErrorMessage)
             .Should().Contain(x => x!.Contains("FinalTopK", StringComparison.Ordinal));
     }

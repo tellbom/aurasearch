@@ -5,6 +5,7 @@ using DualNewsSearch.Application.Services;
 using DualNewsSearch.Infrastructure.Content;
 using DualNewsSearch.Infrastructure.Persistence;
 using DualNewsSearch.Infrastructure.Search;
+using DualNewsSearch.Infrastructure.Provisioning;
 using DualNewsSearch.Infrastructure.Health;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -84,6 +85,22 @@ public static class DependencyInjection
             provider.GetRequiredService<ElasticsearchAdapter>());
         services.AddScoped<IQueryDiagnosticsRenderer>(provider =>
             provider.GetRequiredService<VespaAdapter>());
+
+        services.AddHttpClient(SearchEngineProvisioner.ElasticsearchClientName, (provider, client) =>
+        {
+            ElasticsearchOptions options = provider
+                .GetRequiredService<Microsoft.Extensions.Options.IOptions<ElasticsearchOptions>>().Value;
+            client.BaseAddress = EnsureTrailingSlash(options.Endpoint);
+            client.Timeout = TimeSpan.FromSeconds(30);
+        });
+        services.AddHttpClient(SearchEngineProvisioner.VespaConfigClientName, (provider, client) =>
+        {
+            VespaOptions options = provider
+                .GetRequiredService<Microsoft.Extensions.Options.IOptions<VespaOptions>>().Value;
+            client.BaseAddress = EnsureTrailingSlash(options.ConfigEndpoint);
+            client.Timeout = TimeSpan.FromMinutes(2);
+        });
+        services.AddSingleton<SearchEngineProvisioner>();
 
         return services;
     }

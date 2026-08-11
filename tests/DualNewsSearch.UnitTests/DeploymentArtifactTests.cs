@@ -23,6 +23,23 @@ public sealed class DeploymentArtifactTests
         lowerSchema.Should().NotContain("onnx");
     }
 
+    [Fact]
+    public void LinuxDependencyScriptOnlyStartsAndValidatesDockerDependencies()
+    {
+        string root = FindRepositoryRoot();
+        string script = File.ReadAllText(Path.Combine(
+            root,
+            "deploy",
+            "linux-mvp",
+            "dependencies-up.sh"));
+
+        script.Should().Contain("docker run --detach");
+        script.Should().Contain("analysis-ik");
+        script.Should().NotContain("prepareandactivate");
+        script.Should().NotContain("create-index-template.json");
+        script.Should().NotContain("_aliases");
+    }
+
     private static string FindRepositoryRoot()
     {
         DirectoryInfo? directory = new(AppContext.BaseDirectory);

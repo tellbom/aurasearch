@@ -12,6 +12,11 @@ public sealed class ElasticsearchOptions
     [Required]
     public string IndexAlias { get; init; } = string.Empty;
 
+    [Required]
+    public string IndexName { get; init; } = string.Empty;
+
+    public bool ProvisioningEnabled { get; init; } = true;
+
     [Range(1, 120_000)]
     public int TimeoutMs { get; init; } = 2_000;
 
@@ -24,6 +29,11 @@ public sealed class VespaOptions
 
     [Required, Url]
     public string Endpoint { get; init; } = string.Empty;
+
+    [Required, Url]
+    public string ConfigEndpoint { get; init; } = string.Empty;
+
+    public bool ProvisioningEnabled { get; init; } = true;
 
     [Required]
     public string Namespace { get; init; } = string.Empty;
