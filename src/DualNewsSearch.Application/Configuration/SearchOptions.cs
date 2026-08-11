@@ -105,9 +105,6 @@ public sealed class IndexingOptions
 {
     public const string SectionName = "Indexing";
 
-    [Required]
-    public string SqlitePath { get; init; } = string.Empty;
-
     [Range(1, 10_000)]
     public int BatchSizeLimit { get; init; } = 200;
 

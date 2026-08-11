@@ -5,11 +5,11 @@
 ## 运行边界
 
 - 目标框架固定为 `net6.0`，SDK 由 `global.json` 固定为 `6.0.402`，禁止升级到 .NET 7/8。
-- Elasticsearch 与 Vespa 使用 Linux Docker 服务；API、SQLite 和 MVP 测试工具在开发机运行。
-- API 启动时自动、幂等地初始化搜索引擎：
+- Elasticsearch 与 Vespa 使用 Linux Docker 服务；API 和 MVP 测试工具在开发机运行；持久化状态统一写入远程 DM8。
+- API 直接以 .NET 6 进程运行，不构建或启动任何 API Docker 容器。API 启动时自动、幂等地初始化搜索引擎：
   - Elasticsearch：验证主版本为 7，创建缺失的 `IndexName` 和 `IndexAlias`；已存在且指向正确时跳过。
   - Vespa：将程序集内嵌的 Application Package 提交到 Config API 执行 `prepareandactivate`。重复部署不会清空已有文档，修改 package 后重启 API 即可生效。
-  - SQLite：执行 EF Core migration。
+  - DM8：生产内网首次部署前执行 `deploy/dm/dm.sql`；AuraSearch 使用独立的 `aurasearch_*` 表和 migration history 表，不覆盖同一 `SYSDBA` schema 下的其他项目。
 
 ## 启动
 
@@ -37,11 +37,20 @@ $env:Elasticsearch__IndexName = 'news-v1'
 $env:Elasticsearch__IndexAlias = 'news-read'
 $env:Vespa__Endpoint = 'http://192.168.124.2:28080'
 $env:Vespa__ConfigEndpoint = 'http://192.168.124.2:29071'
-$env:Indexing__SqlitePath = 'data/search.db'
+$env:ConnectionStrings__SearchDatabase = 'Server=<dm-host>;Port=5236;User Id=<dm-user>;Password=<dm-password>;'
 dotnet run --project src/DualNewsSearch.Api
 ```
 
 若由外部平台预先管理 schema，可分别设置 `Elasticsearch__ProvisioningEnabled=false` 或 `Vespa__ProvisioningEnabled=false`。默认保持自动初始化。
+
+首次使用空 DM schema 时执行初始化 SQL：
+
+```powershell
+Get-Content deploy/dm/dm.sql |
+  & 'E:\DM\bin\DIsql.exe' -S '<dm-user>/<dm-password>@<dm-host>:5236'
+```
+
+`dm.sql` 只创建空表、索引和 EF migration 标记，不写入新闻、公告或门户种子数据，也不包含任何 SQLite 迁移逻辑。业务数据由上游调用 Index API 导入。该 SQL 只对空 schema 执行一次。
 
 Vespa package 的兼容修改会在下一次 API 启动时自动激活。Elasticsearch 已存在 index 的 analyzer/settings 不会被静默改写；需要修改不兼容 mapping 时，必须走独立的新 index、回填、一致性检查和 alias 原子切换流程。若配置的 `IndexName` 不存在但 `IndexAlias` 已指向其他索引，API 会拒绝启动，避免误建多目标 alias。
 
@@ -51,7 +60,7 @@ Vespa package 的兼容修改会在下一次 API 启动时自动激活。Elastic
 - 请求与响应：`application/json`
 - 枚举使用字符串，例如 `News`、`Announcement`、`Portal`、`Rrf`。
 - 时间使用包含时区的 ISO 8601 格式，服务端统一转换为 UTC。
-- 写入 API 返回 `202 Accepted`，表示 SQLite 期望状态已接收；使用 indexing snapshot 判断 ES/Vespa 是否追平。
+- 写入 API 返回 `202 Accepted`，表示 DM 期望状态已接收；使用 indexing snapshot 判断 ES/Vespa 是否追平。
 - 搜索响应 body 和 `X-Search-Trace-ID` header 都包含本次查询的 trace ID。
 - Swagger 只在 `Development` 环境启用：`/swagger`。
 - Vue/Vite 开发环境建议将 `/api`、`/health` 代理到本 API，避免额外开放跨域来源。
@@ -163,7 +172,7 @@ Vespa package 的兼容修改会在下一次 API 启动时自动激活。Elastic
 | GET | `/api/v1/search-health` | 返回当前模式、引擎状态、同步率、积压、一致性与模式审计 |
 | POST | `/api/v1/search-health/mode` | 人工切换 `EsOnly/VespaOnly/Rrf/Shadow` |
 | GET | `/api/v1/operations/indexing-snapshot` | 返回 desired、双引擎 applied、backlog 和 sourceType 计数 |
-| GET | `/api/v1/operations/consistency?hashSampleSize=100` | 比较 SQLite、ES、Vespa 的 count/sourceType/hash |
+| GET | `/api/v1/operations/consistency?hashSampleSize=100` | 比较 DM、ES、Vespa 的 count/sourceType/hash |
 | POST | `/api/v1/operations/retry-dead?newsId=` | 重试 Dead outbox；`newsId` 为空时重试全部 |
 | POST | `/api/v1/operations/reindex` | 按 newsId、发布时间范围或全量重新入队 |
 | POST | `/api/v1/diagnostics/{elasticsearch|vespa}/query?topK=50` | 渲染引擎请求，不实际执行搜索 |

@@ -1,4 +1,3 @@
-using System.Data;
 using DualNewsSearch.Application.Abstractions;
 using DualNewsSearch.Application.Contracts;
 using DualNewsSearch.Domain;
@@ -98,9 +97,6 @@ public sealed class DesiredDocumentStore : IDesiredDocumentStore
         try
         {
             await using SearchDbContext db = await _dbFactory.CreateDbContextAsync(cancellationToken);
-            await using var transaction = await db.Database.BeginTransactionAsync(
-                IsolationLevel.Serializable,
-                cancellationToken);
             DesiredDocumentEntity? existing = await db.DesiredDocuments
                 .SingleOrDefaultAsync(x => x.NewsId == newsId, cancellationToken);
             if (existing is not null)
@@ -118,7 +114,6 @@ public sealed class DesiredDocumentStore : IDesiredDocumentStore
 
             await update(db, existing, _clock.UtcNow);
             await db.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
             return DesiredWriteStatus.Accepted;
         }
         finally

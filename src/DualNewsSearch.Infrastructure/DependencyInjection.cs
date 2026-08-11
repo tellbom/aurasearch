@@ -21,17 +21,16 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        string sqlitePath = configuration[$"{IndexingOptions.SectionName}:SqlitePath"]
-            ?? throw new InvalidOperationException("Indexing:SqlitePath is required.");
-
-        string? directory = Path.GetDirectoryName(Path.GetFullPath(sqlitePath));
-        if (!string.IsNullOrWhiteSpace(directory))
+        string? dmConnectionString = configuration.GetConnectionString("SearchDatabase");
+        if (string.IsNullOrWhiteSpace(dmConnectionString))
         {
-            Directory.CreateDirectory(directory);
+            throw new InvalidOperationException(
+                "ConnectionStrings:SearchDatabase is required for the DM database.");
         }
 
         services.AddDbContextFactory<SearchDbContext>(options =>
-            options.UseSqlite($"Data Source={sqlitePath};Cache=Shared"));
+            options.UseDm(dmConnectionString, dmOptions =>
+                dmOptions.MigrationsHistoryTable("aurasearch_ef_migrations_history")));
         services.AddSingleton<IClock, SystemClock>();
         services.AddSingleton<IHtmlTextCleaner, HtmlAgilityTextCleaner>();
         services.AddScoped<IDesiredDocumentStore, DesiredDocumentStore>();

@@ -22,6 +22,15 @@
           "Microsoft.Extensions.Hosting": "6.0.1"
         }
       },
+      "Microsoft.EntityFrameworkCore.InMemory": {
+        "type": "Direct",
+        "requested": "[6.0.25, )",
+        "resolved": "6.0.25",
+        "contentHash": "T1wFaHL0WS51PlrSzWfBX2qppMbuIserPUaSwrw6Uhvg4WllsQPKYqFGAZC9bbUAihjgY5es7MIgSEtXYNdLiw==",
+        "dependencies": {
+          "Microsoft.EntityFrameworkCore": "6.0.25"
+        }
+      },
       "Microsoft.NET.Test.Sdk": {
         "type": "Direct",
         "requested": "[17.7.2, )",
@@ -49,6 +58,21 @@
         "resolved": "2.5.3",
         "contentHash": "HFFL6O+QLEOfs555SqHii48ovVa4CqGYanY+B32BjLpPptdE+wEJmCFNXlLHdEOD5LYeayb9EroaUpydGpcybg=="
       },
+      "DM.DmProvider": {
+        "type": "Transitive",
+        "resolved": "8.3.1.33449",
+        "contentHash": "0c8T0sDMb7WnbGStRJfdXYDtMRcOYHCLydBKqVc5y+49UaojS/zxUV3v/lgFKNT8CPoA07+nWd03rNk4kbVmSg=="
+      },
+      "DM.Microsoft.EntityFrameworkCore": {
+        "type": "Transitive",
+        "resolved": "6.0.0.33671",
+        "contentHash": "SRImPptBmEAT5t1dSmLBLG4cp2agIQIlzXNKIbEWYkBkSIc3dFUkCpYHGW3c0/tWJLJL61XxwmItYACKPjp2YQ==",
+        "dependencies": {
+          "DM.DmProvider": "8.3.1.33449",
+          "Microsoft.EntityFrameworkCore": "6.0.12",
+          "Microsoft.EntityFrameworkCore.Relational": "6.0.9"
+        }
+      },
       "HtmlAgilityPack": {
         "type": "Transitive",
         "resolved": "1.11.54",
@@ -66,14 +90,6 @@
         "type": "Transitive",
         "resolved": "17.7.2",
         "contentHash": "ntbkwIqwszkfCRjxVZOyEQiHauiYsY9NtYjw9ASsoxDSiG8YtV6AGcOAwrAk3TZv2UOq4MrpX+3MYEeMHSb03w=="
-      },
-      "Microsoft.Data.Sqlite.Core": {
-        "type": "Transitive",
-        "resolved": "6.0.25",
-        "contentHash": "rbXNoMg/ylGyJxLcyetojuXFzvDG85M31DfFbqL8veN4P8oG6wmnPwWNn3/bDIEDVvdw15R092dxpobQeQcjGg==",
-        "dependencies": {
-          "SQLitePCLRaw.core": "2.1.2"
-        }
       },
       "Microsoft.EntityFrameworkCore": {
         "type": "Transitive",
@@ -106,25 +122,6 @@
         "dependencies": {
           "Microsoft.EntityFrameworkCore": "6.0.25",
           "Microsoft.Extensions.Configuration.Abstractions": "6.0.0"
-        }
-      },
-      "Microsoft.EntityFrameworkCore.Sqlite": {
-        "type": "Transitive",
-        "resolved": "6.0.25",
-        "contentHash": "vaQNuXgUN0nIzFXQiPSb9iAaJqLvZA164Sx9mjF5rFQS5cwQ/AiymF0e4J0QH3P07Mf3zEVZE5u2fTO0NacuMQ==",
-        "dependencies": {
-          "Microsoft.EntityFrameworkCore.Sqlite.Core": "6.0.25",
-          "SQLitePCLRaw.bundle_e_sqlite3": "2.1.2"
-        }
-      },
-      "Microsoft.EntityFrameworkCore.Sqlite.Core": {
-        "type": "Transitive",
-        "resolved": "6.0.25",
-        "contentHash": "IU4E8I9FS2sUVxJJ0w/4jogLQ8C0zvu/SO6b1tRmiiCtTrHhjUB0tqhxjrFnDXZ/mpCJOElw50+qhbcElm0CYw==",
-        "dependencies": {
-          "Microsoft.Data.Sqlite.Core": "6.0.25",
-          "Microsoft.EntityFrameworkCore.Relational": "6.0.25",
-          "Microsoft.Extensions.DependencyModel": "6.0.0"
         }
       },
       "Microsoft.Extensions.ApiDescription.Server": {
@@ -671,36 +668,6 @@
         "type": "Transitive",
         "resolved": "4.3.0",
         "contentHash": "VB5cn/7OzUfzdnC8tqAIMQciVLiq2epm2NrAm1E9OjNRyG4lVhfR61SMcLizejzQP8R8Uf/0l5qOIbUEi+RdEg=="
-      },
-      "SQLitePCLRaw.bundle_e_sqlite3": {
-        "type": "Transitive",
-        "resolved": "2.1.2",
-        "contentHash": "ilkvNhrTersLmIVAcDwwPqfhUFCg19Z1GVMvCSi3xk6Akq94f4qadLORQCq/T8+9JgMiPs+F/NECw5uauviaNw==",
-        "dependencies": {
-          "SQLitePCLRaw.lib.e_sqlite3": "2.1.2",
-          "SQLitePCLRaw.provider.e_sqlite3": "2.1.2"
-        }
-      },
-      "SQLitePCLRaw.core": {
-        "type": "Transitive",
-        "resolved": "2.1.2",
-        "contentHash": "A8EBepVqY2lnAp3a8jnhbgzF2tlj2S3HcJQGANTYg/TbYbKa8Z5cM1h74An/vy0svhfzT7tVY0sFmUglLgv+2g==",
-        "dependencies": {
-          "System.Memory": "4.5.3"
-        }
-      },
-      "SQLitePCLRaw.lib.e_sqlite3": {
-        "type": "Transitive",
-        "resolved": "2.1.2",
-        "contentHash": "zibGtku8M4Eea1R3ZCAxc86QbNvyEN17mAcQkvWKBuHvRpMiK2g5anG4R5Be7cWKSd1i6baYz8y4dMMAKcXKPg=="
-      },
-      "SQLitePCLRaw.provider.e_sqlite3": {
-        "type": "Transitive",
-        "resolved": "2.1.2",
-        "contentHash": "lxCZarZdvAsMl2zw9bXHrXK6RxVhB4b23iTFhCOdHFhxfbsxLxWf+ocvswJwR/9Wh/E//ddMi+wJGqUKV7VwoA==",
-        "dependencies": {
-          "SQLitePCLRaw.core": "2.1.2"
-        }
       },
       "Swashbuckle.AspNetCore": {
         "type": "Transitive",
@@ -1573,10 +1540,12 @@
       "dualnewssearch.infrastructure": {
         "type": "Project",
         "dependencies": {
+          "DM.Microsoft.EntityFrameworkCore": "[6.0.0.33671, )",
           "DualNewsSearch.Application": "[1.0.0, )",
           "DualNewsSearch.Domain": "[1.0.0, )",
           "HtmlAgilityPack": "[1.11.54, )",
-          "Microsoft.EntityFrameworkCore.Sqlite": "[6.0.25, )",
+          "Microsoft.EntityFrameworkCore": "[6.0.25, )",
+          "Microsoft.EntityFrameworkCore.Relational": "[6.0.25, )",
           "Microsoft.Extensions.Http.Polly": "[6.0.25, )"
         }
       },

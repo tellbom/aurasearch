@@ -2,10 +2,11 @@
 
 | Section | 关键字段 |
 |---|---|
+| ConnectionStrings | SearchDatabase（DM8 ADO.NET 连接字符串） |
 | Elasticsearch | Endpoint、IndexName、IndexAlias、ProvisioningEnabled、TimeoutMs、ResultVersion |
 | Vespa | Endpoint、ConfigEndpoint、ProvisioningEnabled、Namespace、DocumentType、RankProfile、TimeoutMs |
 | Fusion | EsTopK、VespaTopK、FinalTopK、RankConstant、EsWeight、VespaWeight、MaxFusionDepth、GlobalTimeoutMs |
-| Indexing | SqlitePath、BatchSizeLimit、MaxRetryCount、WorkerPollIntervalMs、HtmlMaxLength、两个 sink 开关 |
+| Indexing | BatchSizeLimit、MaxRetryCount、WorkerPollIntervalMs、HtmlMaxLength、两个 sink 开关 |
 | Telemetry | RetentionDays、CleanupBatchSize、StoreRawQuery、AllowRepeatedClicks |
 | SearchMode | Default、RequireReadinessForVespa |
 | Readiness | BackfillComplete、1h/24h 同步率、积压、最大滞后和检查间隔 |
@@ -14,6 +15,7 @@
 
 ```text
 Elasticsearch__Endpoint=http://es.internal:9200
+ConnectionStrings__SearchDatabase=Server=dm.internal;Port=5236;User Id=SYSDBA;Password=***;
 Elasticsearch__IndexName=news-v1
 Elasticsearch__IndexAlias=news-read
 Vespa__Endpoint=http://vespa:8080

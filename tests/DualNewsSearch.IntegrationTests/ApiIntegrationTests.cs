@@ -4,27 +4,26 @@ using DualNewsSearch.Infrastructure.Persistence;
 using FluentAssertions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace DualNewsSearch.IntegrationTests;
 
 public sealed class ApiIntegrationTests : IAsyncLifetime
 {
-    private string _databasePath = string.Empty;
+    private string _databaseName = string.Empty;
     private WebApplicationFactory<Program> _factory = null!;
 
     public Task InitializeAsync()
     {
-        _databasePath = Path.Combine(
-            Path.GetTempPath(),
-            $"dual-news-search-{Guid.NewGuid():N}.db");
+        _databaseName = $"dual-news-search-{Guid.NewGuid():N}";
         _factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
             builder.UseEnvironment("Testing");
-            builder.UseSetting("Indexing:SqlitePath", _databasePath);
+            builder.UseSetting("ConnectionStrings:SearchDatabase", "test-only");
             builder.UseSetting("Indexing:ElasticsearchSinkEnabled", "false");
             builder.UseSetting("Indexing:VespaSinkEnabled", "false");
             builder.UseSetting("Readiness:CheckIntervalSeconds", "3600");
@@ -32,11 +31,20 @@ public sealed class ApiIntegrationTests : IAsyncLifetime
             {
                 configuration.AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    ["Indexing:SqlitePath"] = _databasePath,
+                    ["ConnectionStrings:SearchDatabase"] = "test-only",
                     ["Indexing:ElasticsearchSinkEnabled"] = "false",
                     ["Indexing:VespaSinkEnabled"] = "false",
                     ["Readiness:CheckIntervalSeconds"] = "3600"
                 });
+            });
+            builder.ConfigureServices(services =>
+            {
+                services.RemoveAll<IDbContextFactory<SearchDbContext>>();
+                services.RemoveAll<DbContextOptions<SearchDbContext>>();
+                services.AddDbContextFactory<SearchDbContext>(options =>
+                    options.UseInMemoryDatabase(_databaseName)
+                        .ConfigureWarnings(warnings =>
+                            warnings.Ignore(InMemoryEventId.TransactionIgnoredWarning)));
             });
         });
         return Task.CompletedTask;
@@ -97,18 +105,5 @@ public sealed class ApiIntegrationTests : IAsyncLifetime
     public async Task DisposeAsync()
     {
         await _factory.DisposeAsync();
-        SqliteConnection.ClearAllPools();
-        if (File.Exists(_databasePath))
-        {
-            File.Delete(_databasePath);
-        }
-        if (File.Exists($"{_databasePath}-shm"))
-        {
-            File.Delete($"{_databasePath}-shm");
-        }
-        if (File.Exists($"{_databasePath}-wal"))
-        {
-            File.Delete($"{_databasePath}-wal");
-        }
     }
 }

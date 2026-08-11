@@ -19,12 +19,14 @@ public sealed class SearchDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(SearchDbContext).Assembly);
-        var converter = new ValueConverter<DateTimeOffset, long>(
-            value => value.UtcTicks,
-            value => new DateTimeOffset(value, TimeSpan.Zero));
-        var nullableConverter = new ValueConverter<DateTimeOffset?, long?>(
-            value => value.HasValue ? value.Value.UtcTicks : null,
-            value => value.HasValue ? new DateTimeOffset(value.Value, TimeSpan.Zero) : null);
+        var converter = new ValueConverter<DateTimeOffset, DateTime>(
+            value => value.UtcDateTime,
+            value => new DateTimeOffset(DateTime.SpecifyKind(value, DateTimeKind.Utc)));
+        var nullableConverter = new ValueConverter<DateTimeOffset?, DateTime?>(
+            value => value.HasValue ? value.Value.UtcDateTime : null,
+            value => value.HasValue
+                ? new DateTimeOffset(DateTime.SpecifyKind(value.Value, DateTimeKind.Utc))
+                : null);
         foreach (var property in modelBuilder.Model.GetEntityTypes().SelectMany(x => x.GetProperties()))
         {
             if (property.ClrType == typeof(DateTimeOffset))

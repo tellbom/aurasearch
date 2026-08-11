@@ -1,4 +1,4 @@
-# Linux Docker 部署运行说明
+# Linux Docker 依赖服务与 .NET API 运行说明
 
 ## 前置
 
@@ -15,6 +15,17 @@ sh deploy/linux-mvp/dependencies-up.sh
 
 脚本只启动 Elasticsearch 与 Vespa Docker 服务并验证基础版本/健康，不再创建 ES index/alias，也不部署 Vespa Application Package。API 必须能访问 ES `29200`、Vespa Query/Document `28080` 和 Vespa Config `29071`。
 
+仓库不提供 API Dockerfile 或 Compose。API 必须在目标环境以 .NET 6 进程直接运行。
+
+## DM 初始化
+
+在空 DM schema 中执行 `deploy/dm/dm.sql`。该文件只创建 AuraSearch 空表、索引和 migration 标记，业务文档必须通过 Index API 导入。
+
+```powershell
+Get-Content deploy/dm/dm.sql |
+  & 'E:\DM\bin\DIsql.exe' -S '<dm-user>/<dm-password>@<dm-host>:5236'
+```
+
 ## API
 
 API 固定使用 .NET 6 并在开发机运行。设置：
@@ -25,6 +36,7 @@ Elasticsearch__IndexName=news-v1
 Elasticsearch__IndexAlias=news-read
 Vespa__Endpoint=http://<mapped-host>:28080
 Vespa__ConfigEndpoint=http://<mapped-host>:29071
+ConnectionStrings__SearchDatabase=Server=<dm-host>;Port=5236;User Id=<user>;Password=<password>;
 ```
 
 API 启动阶段自动创建缺失的 ES index/alias，并将内嵌 Vespa Application Package 执行 `prepareandactivate`。配置修改随 API 构建发布，不再登录服务器修改。
@@ -35,7 +47,7 @@ API 启动阶段自动创建缺失的 ES index/alias，并将内嵌 Vespa Applic
 
 1. `POST /api/v1/search-health/mode` 切 `EsOnly`。
 2. 必要时设置 `Indexing__VespaSinkEnabled=false` 后滚动重启，ES sink 和 Index API 继续。
-3. 备份开发机上的 SQLite 数据库，再停止/重建 Vespa。
+3. 使用 DM 官方备份或 schema 级导出保护 `aurasearch_*` 表，再停止/重建 Vespa。
 4. 回填、count/hash/readiness 全通过后才允许人工恢复；系统不会自动回切。
 
-SQLite 备份应在一致性点使用 SQLite backup API 或短暂停写后的卷快照，不直接复制活跃 WAL 主文件。
+DM 备份应使用数据库官方备份/导出能力，并在恢复演练后再用于回滚；不要通过复制数据库进程文件替代备份。

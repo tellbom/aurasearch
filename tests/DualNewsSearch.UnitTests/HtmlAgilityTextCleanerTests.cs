@@ -76,9 +76,7 @@ public sealed class HtmlAgilityTextCleanerTests
         return new HtmlAgilityTextCleaner(
             Options.Create(new IndexingOptions
             {
-                SqlitePath = "unused.db",
                 HtmlMaxLength = maxLength
             }));
     }
 }
-

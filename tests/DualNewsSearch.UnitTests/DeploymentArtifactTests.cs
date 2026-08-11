@@ -34,10 +34,30 @@ public sealed class DeploymentArtifactTests
             "dependencies-up.sh"));
 
         script.Should().Contain("docker run --detach");
+        script.Should().NotContain("docker compose");
         script.Should().Contain("analysis-ik");
         script.Should().NotContain("prepareandactivate");
         script.Should().NotContain("create-index-template.json");
         script.Should().NotContain("_aliases");
+
+        Directory.GetFiles(Path.Combine(root, "deploy"), "docker-compose.yml", SearchOption.AllDirectories)
+            .Should().BeEmpty();
+        Directory.GetFiles(Path.Combine(root, "deploy"), "Dockerfile", SearchOption.AllDirectories)
+            .Should().BeEmpty();
+    }
+
+    [Fact]
+    public void DmInitializationCreatesOnlyEmptyAuraSearchSchema()
+    {
+        string root = FindRepositoryRoot();
+        string sql = File.ReadAllText(Path.Combine(root, "deploy", "dm", "dm.sql"));
+
+        sql.Should().Contain("aurasearch_desired_documents");
+        sql.Should().Contain("aurasearch_index_outbox");
+        sql.Should().Contain("aurasearch_search_queries");
+        sql.Should().Contain("aurasearch_search_results");
+        sql.Should().Contain("aurasearch_search_clicks");
+        sql.Should().NotContain("INSERT INTO \"aurasearch_desired_documents\"");
     }
 
     private static string FindRepositoryRoot()

@@ -8,14 +8,14 @@
 - `DELETE /api/v1/index/documents/{newsId}?indexVersion=...`：写入 tombstone。
 - `POST /api/v1/index/documents/batch`：逐条返回 Accepted/NoOp/Stale/Invalid；一条失败不回滚整批。
 
-索引接口只提交 SQLite 期望状态与 Outbox，返回 `202 Accepted`，不等待搜索引擎。
+索引接口只提交 DM 期望状态与 Outbox，返回 `202 Accepted`，不等待搜索引擎。
 
 ## 搜索
 
 - `POST /api/v1/search`：支持 query、sourceTypes、publishTimeFrom/To、publisher、author、page、pageSize。
 - `GET /api/v1/suggest?q=...&size=10`：只访问 Elasticsearch。
 
-搜索响应包含 `searchTraceId/searchMode/degraded/degradationMode/maxDepthReached/page/pageSize/results`。普通响应不暴露原始引擎分数；SQLite 诊断记录保留 esRank/esScore/vespaRank/vespaRelevance/rrfRank/rrfScore。
+搜索响应包含 `searchTraceId/searchMode/degraded/degradationMode/maxDepthReached/page/pageSize/results`。普通响应不暴露原始引擎分数；DM 诊断记录保留 esRank/esScore/vespaRank/vespaRelevance/rrfRank/rrfScore。
 
 ## 埋点
 

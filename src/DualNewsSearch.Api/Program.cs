@@ -54,6 +54,7 @@ app.UseExceptionHandler(errorApp =>
         await Results.Problem(
             statusCode: StatusCodes.Status500InternalServerError,
             title: "Unexpected server error",
+            detail: app.Environment.IsDevelopment() ? feature?.Error.ToString() : null,
             extensions: new Dictionary<string, object?>
             {
                 ["correlationId"] = Activity.Current?.Id ?? context.TraceIdentifier
@@ -106,7 +107,14 @@ using (IServiceScope scope = app.Services.CreateScope())
     IDbContextFactory<SearchDbContext> factory =
         scope.ServiceProvider.GetRequiredService<IDbContextFactory<SearchDbContext>>();
     await using SearchDbContext db = await factory.CreateDbContextAsync();
-    await db.Database.MigrateAsync();
+    if (db.Database.IsRelational())
+    {
+        await db.Database.MigrateAsync();
+    }
+    else
+    {
+        await db.Database.EnsureCreatedAsync();
+    }
 }
 
 await app.RunAsync();

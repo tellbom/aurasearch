@@ -3,22 +3,20 @@ using DualNewsSearch.Application.Abstractions;
 using DualNewsSearch.Domain;
 using DualNewsSearch.Infrastructure.Persistence;
 using FluentAssertions;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace DualNewsSearch.UnitTests;
 
-public sealed class DesiredDocumentStoreTests : IAsyncDisposable
+public sealed class DesiredDocumentStoreTests
 {
-    private readonly SqliteConnection _connection;
     private readonly IDbContextFactory<SearchDbContext> _factory;
 
     public DesiredDocumentStoreTests()
     {
-        _connection = new SqliteConnection("Data Source=:memory:");
-        _connection.Open();
         var options = new DbContextOptionsBuilder<SearchDbContext>()
-            .UseSqlite(_connection)
+            .UseInMemoryDatabase($"desired-store-{Guid.NewGuid():N}")
+            .ConfigureWarnings(warnings => warnings.Ignore(InMemoryEventId.TransactionIgnoredWarning))
             .Options;
         _factory = new TestDbContextFactory(options);
         using SearchDbContext db = _factory.CreateDbContext();
@@ -55,8 +53,6 @@ public sealed class DesiredDocumentStoreTests : IAsyncDisposable
         await using SearchDbContext db = await _factory.CreateDbContextAsync();
         (await db.DesiredDocuments.SingleAsync()).IndexVersion.Should().Be(25);
     }
-
-    public ValueTask DisposeAsync() => _connection.DisposeAsync();
 
     private static DesiredDocumentWrite Write(long version)
     {

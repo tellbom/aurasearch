@@ -1,5 +1,4 @@
 #!/usr/bin/env sh
 set -eu
-docker network inspect "${SEARCH_NETWORK:-dual-news-search}" >/dev/null 2>&1 ||
-  docker network create --internal "${SEARCH_NETWORK:-dual-news-search}" >/dev/null
-docker compose -f "$(dirname "$0")/../docker-compose.yml" up -d
+
+exec "$(dirname "$0")/../../linux-mvp/dependencies-up.sh"
