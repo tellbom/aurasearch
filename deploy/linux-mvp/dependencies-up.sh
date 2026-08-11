@@ -10,9 +10,9 @@ set -eu
 : "${ES_PORT:=29200}"
 : "${VESPA_QUERY_PORT:=28080}"
 : "${VESPA_CONFIG_PORT:=29071}"
-: "${ES_JAVA_OPTS:=-Xms1g -Xmx1g}"
-: "${VESPA_MEMORY_LIMIT:=8g}"
-: "${VESPA_CPU_LIMIT:=4}"
+: "${ES_JAVA_OPTS:=-Xms30g -Xmx30g}"
+: "${VESPA_MEMORY_LIMIT:=160g}"
+: "${VESPA_CPU_LIMIT:=60}"
 
 project_name=aurasearch-mvp
 network_name="$project_name"
