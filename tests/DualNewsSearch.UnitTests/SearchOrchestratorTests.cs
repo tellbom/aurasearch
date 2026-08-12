@@ -122,7 +122,8 @@ public sealed class SearchOrchestratorTests
         return new SearchOrchestrator(
             adapters,
             Options.Create(new FusionOptions()),
-            new SearchModeState(Options.Create(new SearchModeOptions { Default = mode })));
+            new SearchModeState(Options.Create(new SearchModeOptions { Default = mode })),
+            new FakeContentStore());
     }
 
     private static SearchQuery Query(int page = 1, int pageSize = 20)
@@ -182,6 +183,21 @@ public sealed class SearchOrchestratorTests
             }
 
             return new EngineSearchResult(Name, _candidates, 1, false, _error);
+        }
+    }
+
+    private sealed class FakeContentStore : ISearchResultContentStore
+    {
+        public Task<IReadOnlyDictionary<string, SearchResultContent>> GetAsync(
+            IReadOnlyCollection<string> newsIds,
+            string query,
+            CancellationToken cancellationToken)
+        {
+            IReadOnlyDictionary<string, SearchResultContent> result = newsIds.ToDictionary(
+                x => x,
+                x => new SearchResultContent(x, $"summary:{x}", null, null),
+                StringComparer.Ordinal);
+            return Task.FromResult(result);
         }
     }
 }

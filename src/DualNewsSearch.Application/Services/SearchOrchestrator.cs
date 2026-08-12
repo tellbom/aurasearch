@@ -32,15 +32,18 @@ public sealed class SearchOrchestrator
     private readonly IReadOnlyDictionary<string, ISearchEngineAdapter> _adapters;
     private readonly FusionOptions _fusion;
     private readonly ISearchModeState _modeState;
+    private readonly ISearchResultContentStore _contentStore;
 
     public SearchOrchestrator(
         IEnumerable<ISearchEngineAdapter> adapters,
         IOptions<FusionOptions> fusion,
-        ISearchModeState modeState)
+        ISearchModeState modeState,
+        ISearchResultContentStore contentStore)
     {
         _adapters = adapters.ToDictionary(x => x.Name, StringComparer.OrdinalIgnoreCase);
         _fusion = fusion.Value;
         _modeState = modeState;
+        _contentStore = contentStore;
     }
 
     public async Task<SearchExecution> SearchAsync(
@@ -129,6 +132,10 @@ public sealed class SearchOrchestrator
         IReadOnlyList<FusedSearchCandidate> page = skip >= _fusion.MaxFusionDepth
             ? Array.Empty<FusedSearchCandidate>()
             : ranked.Skip(skip).Take(query.PageSize).ToArray();
+        IReadOnlyDictionary<string, SearchResultContent> content = await _contentStore.GetAsync(
+            page.Select(x => x.NewsId).ToArray(),
+            query.Query,
+            cancellationToken);
         totalWatch.Stop();
 
         var response = new SearchResponse(
@@ -139,14 +146,7 @@ public sealed class SearchOrchestrator
             maxDepthReached,
             query.Page,
             query.PageSize,
-            page.Select(x => new SearchResultItem(
-                x.NewsId,
-                x.Title,
-                x.Highlight,
-                x.Publisher,
-                x.Author,
-                x.SourceType,
-                x.PublishTime)).ToArray());
+            page.Select(x => ToResponseItem(x, content.GetValueOrDefault(x.NewsId))).ToArray());
 
         return new SearchExecution(
             response,
@@ -165,12 +165,14 @@ public sealed class SearchOrchestrator
             query with { Page = 1, PageSize = _fusion.MaxFusionDepth },
             cancellationToken);
 
+        IReadOnlyDictionary<string, SearchResultItem> responseItems = search.Response.Results
+            .ToDictionary(x => x.NewsId, StringComparer.Ordinal);
         SearchDayGroup[] allDays = search.Ranked
             .GroupBy(x => x.PublishTime.ToOffset(TimeSpan.FromHours(8)).ToString("yyyy-MM-dd"))
             .OrderByDescending(x => x.Key, StringComparer.Ordinal)
             .Select(group => new SearchDayGroup(
                 group.Key,
-                group.Select(ToResponseItem).ToArray()))
+                group.Select(x => responseItems[x.NewsId]).ToArray()))
             .ToArray();
         int totalPages = allDays.Length == 0
             ? 0
@@ -195,7 +197,9 @@ public sealed class SearchOrchestrator
         return new DayGroupedSearchExecution(response, search);
     }
 
-    private static SearchResultItem ToResponseItem(FusedSearchCandidate candidate)
+    private static SearchResultItem ToResponseItem(
+        FusedSearchCandidate candidate,
+        SearchResultContent? content)
     {
         return new SearchResultItem(
             candidate.NewsId,
@@ -204,7 +208,10 @@ public sealed class SearchOrchestrator
             candidate.Publisher,
             candidate.Author,
             candidate.SourceType,
-            candidate.PublishTime);
+            candidate.PublishTime,
+            content?.Summary ?? (candidate.SourceType == SourceType.News ? candidate.Highlight : null),
+            content?.ContentHtml,
+            content?.Cover);
     }
 
     private async Task<EngineSearchResult> ExecuteAsync(

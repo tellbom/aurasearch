@@ -15,6 +15,7 @@ CREATE TABLE "aurasearch_desired_documents" (
     "Title" NVARCHAR2(1000) NOT NULL,
     "content_html" CLOB NOT NULL,
     "content_text" CLOB NOT NULL,
+    "Cover" NVARCHAR2(2048) NULL,
     "Publisher" NVARCHAR2(500) NOT NULL,
     "Author" NVARCHAR2(500) NOT NULL,
     "PublishTime" TIMESTAMP NOT NULL,
@@ -118,5 +119,8 @@ CREATE UNIQUE INDEX "ux_aura_result_trace_news"
 
 INSERT INTO "aurasearch_ef_migrations_history" ("MigrationId", "ProductVersion")
 VALUES ('20260811015200_InitialDmCreate', '6.0.25');
+
+INSERT INTO "aurasearch_ef_migrations_history" ("MigrationId", "ProductVersion")
+VALUES ('20260812005621_AddCover', '6.0.25');
 
 COMMIT;

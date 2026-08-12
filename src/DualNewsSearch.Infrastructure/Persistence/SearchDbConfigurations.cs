@@ -15,6 +15,7 @@ public sealed class DesiredDocumentConfiguration : IEntityTypeConfiguration<Desi
         builder.Property(x => x.Title).HasMaxLength(1000);
         builder.Property(x => x.ContentHtml).HasColumnName("content_html").HasColumnType("CLOB");
         builder.Property(x => x.ContentText).HasColumnName("content_text").HasColumnType("CLOB");
+        builder.Property(x => x.Cover).HasMaxLength(2048);
         builder.Property(x => x.Publisher).HasMaxLength(500);
         builder.Property(x => x.Author).HasMaxLength(500);
         builder.Property(x => x.ContentHash).HasColumnName("content_hash").HasMaxLength(64);

@@ -17,6 +17,9 @@ public sealed class UpsertDocumentRequest : IValidatableObject
     [Required]
     public string ContentHtml { get; init; } = string.Empty;
 
+    [Url, StringLength(2_048)]
+    public string? Cover { get; init; }
+
     [StringLength(500)]
     public string Publisher { get; init; } = string.Empty;
 

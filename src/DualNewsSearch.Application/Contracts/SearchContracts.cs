@@ -59,7 +59,24 @@ public sealed record SearchResultItem(
     string Publisher,
     string Author,
     SourceType SourceType,
-    DateTimeOffset PublishTime);
+    DateTimeOffset PublishTime,
+    string? Summary = null,
+    string? ContentHtml = null,
+    string? Cover = null);
+
+public sealed record SearchResultContent(
+    string NewsId,
+    string? Summary,
+    string? ContentHtml,
+    string? Cover);
+
+public interface ISearchResultContentStore
+{
+    Task<IReadOnlyDictionary<string, SearchResultContent>> GetAsync(
+        IReadOnlyCollection<string> newsIds,
+        string query,
+        CancellationToken cancellationToken);
+}
 
 public sealed record SearchResponse(
     Guid SearchTraceId,

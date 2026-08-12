@@ -103,7 +103,10 @@ Vespa package 的兼容修改会在下一次 API 启动时自动激活。Elastic
       "publisher": "示例发布方",
       "author": "示例作者",
       "sourceType": "News",
-      "publishTime": "2026-08-11T00:00:00+00:00"
+      "publishTime": "2026-08-11T00:00:00+00:00",
+      "summary": "清洗 HTML 后生成的新闻正文摘要…",
+      "contentHtml": null,
+      "cover": "https://cdn.example.com/news/10001.jpg"
     }
   ]
 }
@@ -125,6 +128,7 @@ Vespa package 的兼容修改会在下一次 API 启动时自动激活。Elastic
   "sourceType": "News",
   "title": "示例标题",
   "contentHtml": "<article><p>示例正文</p></article>",
+  "cover": "https://cdn.example.com/news/10001.jpg",
   "publisher": "示例发布方",
   "author": "示例作者",
   "publishTime": "2026-08-11T08:00:00+08:00",
@@ -132,7 +136,7 @@ Vespa package 的兼容修改会在下一次 API 启动时自动激活。Elastic
 }
 ```
 
-`newsId/sourceId` 最长 256，`title` 最长 1,000，`indexVersion` 必须为正数且对同一 `newsId` 单调递增。响应状态为 `Accepted`、`NoOp` 或 `Stale`。
+`newsId/sourceId` 最长 256，`title` 最长 1,000，新闻可携带最长 2,048 字符的 `cover` 图片地址，`indexVersion` 必须为正数且对同一 `newsId` 单调递增。响应状态为 `Accepted`、`NoOp` 或 `Stale`。
 
 ### `DELETE /api/v1/index/documents/{newsId}?indexVersion={version}`
 
@@ -150,6 +154,7 @@ Vespa package 的兼容修改会在下一次 API 启动时自动激活。Elastic
         "sourceType": "News",
         "title": "示例标题",
         "contentHtml": "<p>示例正文</p>",
+        "cover": "https://cdn.example.com/news/10001.jpg",
         "publisher": "示例发布方",
         "author": "示例作者",
         "publishTime": "2026-08-11T08:00:00+08:00",

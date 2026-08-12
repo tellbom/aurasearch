@@ -49,6 +49,7 @@ public sealed class DesiredDocumentEntity
     public string Title { get; set; } = string.Empty;
     public string ContentHtml { get; set; } = string.Empty;
     public string ContentText { get; set; } = string.Empty;
+    public string? Cover { get; set; }
     public string Publisher { get; set; } = string.Empty;
     public string Author { get; set; } = string.Empty;
     public DateTimeOffset PublishTime { get; set; }

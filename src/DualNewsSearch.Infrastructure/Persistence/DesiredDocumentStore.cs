@@ -64,6 +64,7 @@ public sealed class DesiredDocumentStore : IDesiredDocumentStore
                         Title = string.Empty,
                         ContentHtml = string.Empty,
                         ContentText = string.Empty,
+                        Cover = null,
                         Publisher = string.Empty,
                         Author = string.Empty,
                         PublishTime = DateTimeOffset.UnixEpoch,
@@ -133,6 +134,7 @@ public sealed class DesiredDocumentStore : IDesiredDocumentStore
         entity.Title = document.Title;
         entity.ContentHtml = write.ContentHtml;
         entity.ContentText = document.ContentText;
+        entity.Cover = document.Cover;
         entity.Publisher = document.Publisher;
         entity.Author = document.Author;
         entity.PublishTime = document.PublishTime;

@@ -64,6 +64,7 @@ public sealed class ApiIntegrationTests : IAsyncLifetime
                 sourceType = "news",
                 title = "测试标题",
                 contentHtml = "<p>测试正文</p>",
+                cover = "https://cdn.example.com/test-1.jpg",
                 publisher = "测试发布者",
                 author = "测试作者",
                 publishTime = "2026-07-30T08:00:00+08:00",
@@ -77,6 +78,7 @@ public sealed class ApiIntegrationTests : IAsyncLifetime
         await using SearchDbContext db = await dbFactory.CreateDbContextAsync();
         DesiredDocumentEntity desired = await db.DesiredDocuments.SingleAsync();
         desired.ContentText.Should().Be("测试正文");
+        desired.Cover.Should().Be("https://cdn.example.com/test-1.jpg");
         desired.IndexVersion.Should().Be(1);
     }
 

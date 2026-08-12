@@ -34,6 +34,7 @@ public static class DependencyInjection
         services.AddSingleton<IClock, SystemClock>();
         services.AddSingleton<IHtmlTextCleaner, HtmlAgilityTextCleaner>();
         services.AddScoped<IDesiredDocumentStore, DesiredDocumentStore>();
+        services.AddScoped<ISearchResultContentStore, SearchResultContentStore>();
         services.AddScoped<IOutboxRepository, OutboxRepository>();
         services.AddScoped<ISearchTelemetryRepository, SearchTelemetryRepository>();
         services.AddScoped<IndexDocumentService>();

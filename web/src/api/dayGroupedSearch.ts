@@ -8,6 +8,9 @@ export interface SearchItem {
   author: string
   sourceType: SourceType
   publishTime: string
+  summary: string | null
+  contentHtml: string | null
+  cover: string | null
 }
 
 export interface SearchDayGroup {
@@ -34,6 +37,8 @@ export interface DayGroupedSearchResponse {
 export interface DayGroupedSearchRequest {
   query: string
   sourceTypes: SourceType[]
+  publishTimeFrom?: string
+  publishTimeTo?: string
   page: number
   pageSize: number
 }

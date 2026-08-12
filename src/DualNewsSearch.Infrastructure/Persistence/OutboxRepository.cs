@@ -248,6 +248,7 @@ public sealed class OutboxRepository : IOutboxRepository
             sourceType,
             entity.Title,
             entity.ContentText,
+            entity.Cover,
             entity.Publisher,
             entity.Author,
             entity.PublishTime,

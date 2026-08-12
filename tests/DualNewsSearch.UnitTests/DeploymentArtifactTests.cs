@@ -59,6 +59,8 @@ public sealed class DeploymentArtifactTests
         sql.Should().Contain("aurasearch_search_queries");
         sql.Should().Contain("aurasearch_search_results");
         sql.Should().Contain("aurasearch_search_clicks");
+        sql.Should().Contain("\"Cover\" NVARCHAR2(2048) NULL");
+        sql.Should().Contain("20260812005621_AddCover");
         sql.Should().NotContain("INSERT INTO \"aurasearch_desired_documents\"");
     }
 

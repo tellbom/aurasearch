@@ -62,6 +62,7 @@ public sealed class DesiredDocumentStoreTests
             SourceType.News,
             "标题",
             "正文",
+            "https://example.com/cover.jpg",
             "发布者",
             "作者",
             DateTimeOffset.UnixEpoch,

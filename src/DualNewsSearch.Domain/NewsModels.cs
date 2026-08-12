@@ -30,6 +30,7 @@ public sealed record NewsSearchDocument(
     SourceType SourceType,
     string Title,
     string ContentText,
+    string? Cover,
     string Publisher,
     string Author,
     DateTimeOffset PublishTime,
@@ -44,6 +45,7 @@ public static class ContentHash
     public static string Compute(
         string title,
         string contentText,
+        string? cover,
         string publisher,
         string author,
         DateTimeOffset publishTime,
@@ -53,6 +55,7 @@ public static class ContentHash
             UnitSeparator,
             Normalize(title),
             Normalize(contentText),
+            Normalize(cover),
             Normalize(publisher),
             Normalize(author),
             publishTime.UtcDateTime.ToString("O", CultureInfo.InvariantCulture),
@@ -64,4 +67,3 @@ public static class ContentHash
 
     private static string Normalize(string? value) => value?.Normalize(NormalizationForm.FormC) ?? string.Empty;
 }
-

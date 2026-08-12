@@ -39,6 +39,7 @@ public sealed class IndexDocumentService
             sourceType,
             request.Title.Trim(),
             clean.Text,
+            string.IsNullOrWhiteSpace(request.Cover) ? null : request.Cover.Trim(),
             request.Publisher.Trim(),
             request.Author.Trim(),
             publishTime.ToUniversalTime(),
@@ -46,6 +47,7 @@ public sealed class IndexDocumentService
             ContentHash.Compute(
                 request.Title.Trim(),
                 clean.Text,
+                string.IsNullOrWhiteSpace(request.Cover) ? null : request.Cover.Trim(),
                 request.Publisher.Trim(),
                 request.Author.Trim(),
                 publishTime,
